@@ -10,7 +10,7 @@ descrição dos arquivos:
 
 # Execução 
 
-Para compilar o programa sequencial execute o make file no diretório que contém os arquivos:
+Para compilar o programa sequencial execute o make no diretório que contém os arquivos:
 ```sh
 $ make
 $ ./dna
