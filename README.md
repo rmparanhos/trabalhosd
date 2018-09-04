@@ -16,3 +16,9 @@ $ make
 $ ./dna
 ```
 Ao final da execução sequencial, os resultados serão escritos no arquivo *dna.out*
+
+
+# Material Extra
+
+  - [Running an MPI Cluster within a LAN](http://mpitutorial.com/tutorials/running-an-mpi-cluster-within-a-lan/)
+  - [Launching an Amazon EC2 MPI Cluster](http://mpitutorial.com/tutorials/launching-an-amazon-ec2-mpi-cluster/)
