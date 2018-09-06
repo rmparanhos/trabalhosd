@@ -28,7 +28,7 @@ Ao final da execução sequencial, os resultados serão escritos no arquivo *dna
 
 Para criar a conta na AWS educate utilize o seguinte link:
 
-www.awseducate.com/registration?refid=nUcx6XPPXGMnFlj0le7mzSKvGPpNiWyw(www.awseducate.com/registration?refid=nUcx6XPPXGMnFlj0le7mzSKvGPpNiWyw)
+www.awseducate.com/registration?refid=nUcx6XPPXGMnFlj0le7mzSKvGPpNiWyw
 
 A conta da AWS educate te dará créditos para serem usados nas máquinas virtuais da AWS. Atenção: você deve utilizar o e-mail do ID-UFF. 
 
