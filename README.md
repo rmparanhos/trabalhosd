@@ -22,3 +22,14 @@ Ao final da execução sequencial, os resultados serão escritos no arquivo *dna
 
   - [Running an MPI Cluster within a LAN](http://mpitutorial.com/tutorials/running-an-mpi-cluster-within-a-lan/)
   - [Launching an Amazon EC2 MPI Cluster](http://mpitutorial.com/tutorials/launching-an-amazon-ec2-mpi-cluster/)
+
+
+# AWS Educate
+
+Para criar a conta na AWS educate utilize o seguinte link:
+
+www.awseducate.com/registration?refid=nUcx6XPPXGMnFlj0le7mzSKvGPpNiWyw(www.awseducate.com/registration?refid=nUcx6XPPXGMnFlj0le7mzSKvGPpNiWyw)
+
+A conta da AWS educate te dará créditos para serem usados nas máquinas virtuais da AWS. Atenção: você deve utilizar o e-mail do ID-UFF. 
+
+PS: ao utilizar o link acima você me ajuda na pesquisa =) (pois eu também ganharei créditos)
