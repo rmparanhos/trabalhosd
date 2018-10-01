@@ -110,9 +110,9 @@ int divide(char *string, int tam_string, char *substr, int tam_substring) {
 	if(meu_rank == 0){
 		int msg_ini;
 		int msg_fim;
-		printf("\nstring\n");
-		printf(string);
-		printf("\n");
+		//printf("\nstring\n");
+		//printf(string);
+		//printf("\n");
 	
 
 		for(i=0;i<np;i++){
@@ -145,7 +145,7 @@ int divide(char *string, int tam_string, char *substr, int tam_substring) {
 		msg_ini = 0;
 		msg_fim = (tam_string/np)+margem;
 		slice_str(string,buffer,msg_ini,msg_fim);
-		printf("\n%s\n", buffer);
+		printf("\nstring: %s \nmeu pedaco: %s\n",string, buffer);
 		result = bmhs(buffer,strlen(buffer),substr,tam_substring);
 		printf("substr %s rank %d ini %d fim %d result %d\n",substr,meu_rank,msg_ini,msg_fim,result);
 	}
@@ -156,7 +156,7 @@ int divide(char *string, int tam_string, char *substr, int tam_substring) {
 		MPI_Recv(&msg_fim, 1, MPI_INT, MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, &status);
 		char buffer[tam_string+1];
 		slice_str(string,buffer,msg_ini,msg_fim);
-		printf("\n%s\n", buffer);
+		printf("\nstring: %s\nmeu pedaco: %s\n", string,buffer);
 		result = bmhs(buffer,strlen(buffer),substr,tam_substring);
 		printf("substr %s rank %d ini %d fim %d result %d result+offset %d\n",substr,meu_rank,msg_ini,msg_fim,result,result+msg_ini);
 		if(result != -1){
@@ -206,7 +206,8 @@ int main(int argc, char** argv) {
 			i += 80;
 		} while (line[0] != '>');
 		strcpy(desc_query, line);
-
+		int meu_rank;
+		MPI_Comm_rank(MPI_COMM_WORLD, &meu_rank);
 		// read database and search
 		found = 0;
 		fseek(fdatabase, 0, SEEK_SET);
@@ -233,16 +234,18 @@ int main(int argc, char** argv) {
 			//result = bmhs(bases, strlen(bases), str, strlen(str));
 			result = divide(bases, strlen(bases), str, strlen(str));
 			if (result > 0) {
-				printf("\n%s\n%d\n", desc_dna, result);
-				fflush(fout);
+				//fflush(stdout);
+				//printf("\n%s\nString %s substr %s Rank %d\n%s\n%d\n",desc_query,bases,str,meu_rank,desc_dna, result);
+				//fflush(fout);
 				fprintf(fout, "%s\n%d\n", desc_dna, result);
 				found++;
 			}
 		}
 
 		if (!found)
-			printf("\nNOT FOUND\n");
-			fflush(fout);
+			//fflush(stdout);
+			//printf("\nRank %d \nNOT FOUND\n",meu_rank);
+			//fflush(fout);
 			fprintf(fout, "NOT FOUND\n");
 	}
 	MPI_Finalize();
