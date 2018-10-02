@@ -35,7 +35,7 @@ int bmhs(char *string, int n, char *substr, int m) {
 	return -1;
 }
 
-FILE *fdatabase, *fquery, *fout;
+FILE *fdatabase, *fquery, *fout, *foutparalelo;
 
 void openfiles() {
 
@@ -57,6 +57,12 @@ void openfiles() {
 		exit(EXIT_FAILURE);
 	}
 
+	foutparalelo = fopen("dnaparalelo.out", "w");
+	if (foutparalelo == NULL) {
+		perror("foutparalelo");
+		exit(EXIT_FAILURE);
+	}
+
 }
 
 void closefiles() {
@@ -68,6 +74,9 @@ void closefiles() {
 
 	fflush(fout);
 	fclose(fout);
+
+	fflush(foutparalelo);
+	fclose(foutparalelo);
 }
 
 void remove_eol(char *line) {
@@ -78,6 +87,39 @@ void remove_eol(char *line) {
 	}
 }
 
+void junta_saida(int np){
+	int i;
+	rewind(fquery);
+	rewind(fdatabase);
+	char desc_query[30];
+	char desc_dna[50];
+	int resultados[np];
+	while(fgets(desc_query,30, fquery) != NULL){
+		printf("\n%s\n",desc_query);
+		while(fgets(desc_dna,50,fdatabase) != NULL){
+			printf("\n%s\n",desc_dna);
+			for(i=0;i<np;i++){
+				char saida_arq[30];
+				sprintf(saida_arq,"dnaparalelo%d.out",i);
+				FILE *leitura_saida = fopen(saida_arq,"r");
+				int resultado;
+				fscanf(leitura_saida,"%d",&resultado);
+				
+				resultados[i] = resultado;
+			}
+			int menor = resultados[0];
+			for(i=1;i<np;i++){
+				if(menor>resultados[i]){
+					if(resultados[i]!=-1){
+						menor = resultados[i];
+					}
+				}
+			}
+			printf("\n%d\n",menor);
+		}
+		fgets(desc_query,30, fquery);
+	}
+}
 
 void slice_str(const char * str, char * buffer, size_t start, size_t end)
 {
@@ -88,7 +130,7 @@ void slice_str(const char * str, char * buffer, size_t start, size_t end)
     buffer[j] = 0;
 }
 
-int divide(char *string, int tam_string, char *substr, int tam_substring) {
+int divide(char *string, int tam_string, char *substr, int tam_substring, char *desc_query, char *desc_dna) {
 	int result;
 	//int tam_string_procs_ini = (tam_string/nprocs) + tam_substring - 1;
 	//int tam_string_procs_meio = (tam_string/nprocs) + tam_substring - 1 + tam_substring - 1;
@@ -103,6 +145,10 @@ int divide(char *string, int tam_string, char *substr, int tam_substring) {
     
     MPI_Comm_rank(MPI_COMM_WORLD, &meu_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &np); // número de processadores
+
+	char *saida[20];
+	sprintf(saida,"dnaparalelo%d.out",meu_rank);
+	foutparalelo = fopen(saida, "a");
 
 	int margem = tam_substring-1;
 	int i;
@@ -145,9 +191,12 @@ int divide(char *string, int tam_string, char *substr, int tam_substring) {
 		msg_ini = 0;
 		msg_fim = (tam_string/np)+margem;
 		slice_str(string,buffer,msg_ini,msg_fim);
-		printf("\nstring: %s \nmeu pedaco: %s\n",string, buffer);
 		result = bmhs(buffer,strlen(buffer),substr,tam_substring);
-		printf("substr %s rank %d ini %d fim %d result %d\n",substr,meu_rank,msg_ini,msg_fim,result);
+		printf("\nstring: %s \nmeu pedaco: %s\nsubstr %s rank %d ini %d fim %d result %d\n",string, buffer,substr,meu_rank,msg_ini,msg_fim,result);
+		
+		fprintf(foutparalelo,"Rank %d\n%s \n%s \n%d \nstring: %s \nmeu pedaco: %s\nsubstr %s rank %d ini %d fim %d result %d\n\n",meu_rank,desc_query,desc_dna,result,string, buffer,substr,meu_rank,msg_ini,msg_fim,result);
+		
+		fclose(foutparalelo);
 	}
 	else{
 		int msg_ini;
@@ -156,12 +205,14 @@ int divide(char *string, int tam_string, char *substr, int tam_substring) {
 		MPI_Recv(&msg_fim, 1, MPI_INT, MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, &status);
 		char buffer[tam_string+1];
 		slice_str(string,buffer,msg_ini,msg_fim);
-		printf("\nstring: %s\nmeu pedaco: %s\n", string,buffer);
 		result = bmhs(buffer,strlen(buffer),substr,tam_substring);
-		printf("substr %s rank %d ini %d fim %d result %d result+offset %d\n",substr,meu_rank,msg_ini,msg_fim,result,result+msg_ini);
 		if(result != -1){
 			result += msg_ini;
 		}
+		printf("\nstring: %s \nmeu pedaco: %s\nsubstr %s rank %d ini %d fim %d result %d\n",string, buffer,substr,meu_rank,msg_ini,msg_fim,result);
+		fprintf(foutparalelo,"Rank %d\n%s \n%s \n%d \nstring: %s \nmeu pedaco: %s\nsubstr %s rank %d ini %d fim %d result %d\n\n",meu_rank,desc_query,desc_dna,result,string, buffer,substr,meu_rank,msg_ini,msg_fim,result);
+		//fprintf(foutparalelo,"%d\n",result);
+		fclose(foutparalelo);
 	}
 	return result;
 }
@@ -191,6 +242,13 @@ int main(int argc, char** argv) {
 	fgets(desc_query, 100, fquery);
 	remove_eol(desc_query);
 	MPI_Init(&argc, &argv);
+	int meu_rank,np;
+	MPI_Comm_rank(MPI_COMM_WORLD, &meu_rank);
+	MPI_Comm_size(MPI_COMM_WORLD, &np);
+	char *saida[20];
+	sprintf(saida,"dnaparalelo%d.out",meu_rank);
+	foutparalelo = fopen(saida, "w");
+	fclose(foutparalelo);
 	while (!feof(fquery)) {
 		fprintf(fout, "%s\n", desc_query);
 		// read query string
@@ -207,7 +265,6 @@ int main(int argc, char** argv) {
 		} while (line[0] != '>');
 		strcpy(desc_query, line);
 		int meu_rank;
-		MPI_Comm_rank(MPI_COMM_WORLD, &meu_rank);
 		// read database and search
 		found = 0;
 		fseek(fdatabase, 0, SEEK_SET);
@@ -232,7 +289,7 @@ int main(int argc, char** argv) {
 			//printf("str\n");
 			//printf(str);
 			//result = bmhs(bases, strlen(bases), str, strlen(str));
-			result = divide(bases, strlen(bases), str, strlen(str));
+			result = divide(bases, strlen(bases), str, strlen(str),desc_query,desc_dna);
 			if (result > 0) {
 				//fflush(stdout);
 				//printf("\n%s\nString %s substr %s Rank %d\n%s\n%d\n",desc_query,bases,str,meu_rank,desc_dna, result);
@@ -249,6 +306,11 @@ int main(int argc, char** argv) {
 			fprintf(fout, "NOT FOUND\n");
 	}
 	MPI_Finalize();
+	
+	//if(meu_rank==0){
+	//	printf("\nfim mpi\n");
+	//	junta_saida(np);
+	//}
 	closefiles();
 
 	free(str);
